@@ -1,8 +1,18 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import PatientHome from './pages/patient/PatientHome'
+import AdminHome from './pages/admin/AdminHome'
+
 function App() {
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <h1 className="text-3xl font-bold text-blue-600">CliniQ is working 🎉</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<PatientHome />} />
+          <Route path="admin" element={<AdminHome />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
 
