@@ -6,7 +6,8 @@ function Layout() {
       <header className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
         <Link to="/" className="text-xl font-bold">CliniQ</Link>
         <nav className="space-x-4">
-          <Link to="/" className="hover:underline">Patient</Link>
+          <Link to="/" className="hover:underline">Book</Link>
+          <Link to="/my-ticket" className="hover:underline">My Ticket</Link>
           <Link to="/admin" className="hover:underline">Admin</Link>
         </nav>
       </header>

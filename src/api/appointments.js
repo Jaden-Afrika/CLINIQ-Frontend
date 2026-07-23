@@ -14,3 +14,8 @@ export async function bookAppointment(slotId) {
   const res = await apiClient.post('/appointments/book/', { slot_id: slotId })
   return res.data
 }
+
+export async function getMyTicket() {
+  const res = await apiClient.get('/appointments/my-ticket/')
+  return res.data
+}
