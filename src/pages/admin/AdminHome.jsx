@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getDoctors, getAdminQueue } from '../../api/appointments'
+import { getDoctors, getAdminQueue, advanceQueue, updateAppointmentStatus } from '../../api/appointments'
 
 const statusStyles = {
   booked: 'bg-blue-100 text-blue-700',
@@ -12,6 +12,7 @@ function AdminHome() {
   const [selectedDoctor, setSelectedDoctor] = useState(null)
   const [queue, setQueue] = useState([])
   const [loading, setLoading] = useState(false)
+  const [actingOn, setActingOn] = useState(null)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -29,6 +30,33 @@ function AdminHome() {
       setError('Could not load queue.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleNext() {
+    if (!selectedDoctor) return
+    setActingOn('next')
+    setError('')
+    try {
+      await advanceQueue(selectedDoctor.id)
+      await loadQueue(selectedDoctor)
+    } catch (err) {
+      setError('No booked appointment at the current ticket number.')
+    } finally {
+      setActingOn(null)
+    }
+  }
+
+  async function handleStatusChange(appointmentId, status) {
+    setActingOn(appointmentId)
+    setError('')
+    try {
+      await updateAppointmentStatus(appointmentId, status)
+      await loadQueue(selectedDoctor)
+    } catch (err) {
+      setError('Could not update status.')
+    } finally {
+      setActingOn(null)
     }
   }
 
@@ -61,12 +89,21 @@ function AdminHome() {
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-4 py-3 border-b flex justify-between items-center">
             <h2 className="font-semibold">Today's Queue — {selectedDoctor.name}</h2>
-            <button
-              onClick={() => loadQueue(selectedDoctor)}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleNext}
+                disabled={actingOn === 'next'}
+                className="bg-blue-600 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+              >
+                {actingOn === 'next' ? 'Advancing...' : 'Next'}
+              </button>
+              <button
+                onClick={() => loadQueue(selectedDoctor)}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Refresh
+              </button>
+            </div>
           </div>
 
           {loading && <p className="p-4 text-gray-500">Loading...</p>}
@@ -83,6 +120,7 @@ function AdminHome() {
                   <th className="px-4 py-2">Patient</th>
                   <th className="px-4 py-2">Source</th>
                   <th className="px-4 py-2">Status</th>
+                  <th className="px-4 py-2">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -95,6 +133,26 @@ function AdminHome() {
                       <span className={`px-2 py-1 rounded text-xs font-medium ${statusStyles[appt.status]}`}>
                         {appt.status.replace('_', ' ')}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {appt.status === 'booked' && (
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleStatusChange(appt.id, 'completed')}
+                            disabled={actingOn === appt.id}
+                            className="text-xs text-green-700 hover:underline disabled:opacity-50"
+                          >
+                            Mark Done
+                          </button>
+                          <button
+                            onClick={() => handleStatusChange(appt.id, 'no_show')}
+                            disabled={actingOn === appt.id}
+                            className="text-xs text-red-700 hover:underline disabled:opacity-50"
+                          >
+                            No Show
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}
