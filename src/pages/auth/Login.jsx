@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { login } from '../../api/auth'
+import { useAuth } from '../../context/AuthContext'
 
 function Login() {
   const [username, setUsername] = useState('')
@@ -8,14 +9,16 @@ function Login() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { refreshUser } = useAuth()
 
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      await login(username, password)
-      navigate('/')
+     await login(username, password)
+await refreshUser()
+navigate('/')
     } catch (err) {
       setError('Invalid username or password.')
     } finally {

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { register, login } from '../../api/auth'
+import { useAuth } from '../../context/AuthContext'
 
 function Signup() {
   const [username, setUsername] = useState('')
@@ -17,8 +18,9 @@ function Signup() {
     setLoading(true)
     try {
       await register(username, password, role, phone)
-      await login(username, password)
-      navigate('/')
+await login(username, password)
+await refreshUser()
+navigate('/')
     } catch (err) {
       setError('Could not create account. Try a different username.')
     } finally {
