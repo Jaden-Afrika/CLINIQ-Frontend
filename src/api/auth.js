@@ -7,8 +7,10 @@ export async function login(username, password) {
   return res.data
 }
 
-export async function register(username, password, role, phone = '') {
-  const res = await apiClient.post('/auth/register/', { username, password, role, phone })
+export async function register(username, password, role, phone = '', doctorName = '', specialty = '') {
+  const payload = { username, password, role, phone }
+  if (role === 'doctor') Object.assign(payload, { doctor_name: doctorName, specialty })
+  const res = await apiClient.post('/auth/register/', payload)
   return res.data
 }
 
@@ -20,4 +22,17 @@ export async function getMe() {
 export function logout() {
   localStorage.removeItem('access_token')
   localStorage.removeItem('refresh_token')
+}
+
+// A staff account must be approved by a super admin before it can use admin tools.
+export function isApprovedStaff(user) {
+  return user?.role === 'staff' && user.is_approved === true
+}
+
+export function isApprovedDoctor(user) {
+  return user?.role === 'doctor' && user.is_approved === true
+}
+
+export function canUseAdminTools(user) {
+  return user?.role === 'super_admin' || isApprovedStaff(user)
 }

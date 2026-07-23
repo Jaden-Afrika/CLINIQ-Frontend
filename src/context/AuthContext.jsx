@@ -20,6 +20,7 @@ export function AuthProvider({ children }) {
     try {
       const data = await getMe()
       setUser(data)
+      return data
     } catch (err) {
       setUser(null)
     } finally {

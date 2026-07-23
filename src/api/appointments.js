@@ -34,3 +34,8 @@ export async function updateAppointmentStatus(appointmentId, status) {
   const res = await apiClient.patch(`/admin/appointments/${appointmentId}/status/`, { status })
   return res.data
 }
+
+export async function submitRating(appointmentId, rating, comment) {
+  const res = await apiClient.post(`/appointments/${appointmentId}/rating/`, { rating, comment })
+  return res.data
+}

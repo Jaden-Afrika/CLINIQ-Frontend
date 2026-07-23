@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react'
 import { getDoctors, getAdminQueue, advanceQueue, updateAppointmentStatus } from '../../api/appointments'
 
 const statusStyles = {
-  booked: 'bg-blue-100 text-blue-700',
-  completed: 'bg-green-100 text-green-700',
-  no_show: 'bg-red-100 text-red-700',
+  booked: 'bg-status-ok/15 text-status-ok',
+  completed: 'bg-ink/10 text-ink',
+  no_show: 'bg-status-alert/15 text-status-alert',
 }
 
 function AdminHome() {
@@ -61,22 +61,24 @@ function AdminHome() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Check-In Dashboard</h1>
+    <div className="mx-auto max-w-6xl px-5 py-10 sm:px-6 sm:py-14">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink/55">Front desk</p>
+      <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">Today’s queue</h1>
+      <p className="mt-3 text-sm text-ink/65">Choose a doctor to view the live check-in board.</p>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {error && <p className="mt-6 border-l-4 border-status-alert bg-status-alert/10 px-4 py-3 text-sm text-ink">{error}</p>}
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Select a doctor</label>
+      <div className="mt-9">
+        <label className="block text-sm font-semibold mb-3">Select a doctor</label>
         <div className="flex flex-wrap gap-2">
           {doctors.map((doctor) => (
             <button
               key={doctor.id}
               onClick={() => loadQueue(doctor)}
-              className={`px-4 py-2 rounded-full border text-sm ${
+              className={`border px-4 py-3 text-sm font-semibold ${
                 selectedDoctor?.id === doctor.id
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-white text-gray-700 border-gray-300 hover:border-gray-400'
+                  ? 'border-ink bg-ink text-panel'
+                  : 'border-ink/20 bg-panel text-ink hover:border-ink'
               }`}
             >
               {doctor.name}
@@ -86,68 +88,68 @@ function AdminHome() {
       </div>
 
       {selectedDoctor && (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="px-4 py-3 border-b flex justify-between items-center">
-            <h2 className="font-semibold">Today's Queue — {selectedDoctor.name}</h2>
+        <div className="mt-8 overflow-hidden border border-ink/15 bg-panel shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-ink/15 px-5 py-5">
+            <div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink/55">Queue board</p><h2 className="mt-1 font-display text-2xl font-bold">{selectedDoctor.name}</h2></div>
             <div className="flex gap-2">
               <button
                 onClick={handleNext}
                 disabled={actingOn === 'next'}
-                className="bg-blue-600 text-white px-4 py-1.5 rounded text-sm hover:bg-blue-700 disabled:opacity-50"
+                className="bg-ticket px-5 py-3 text-sm font-bold text-ink hover:bg-ticket/85 disabled:opacity-50"
               >
                 {actingOn === 'next' ? 'Advancing...' : 'Next'}
               </button>
               <button
                 onClick={() => loadQueue(selectedDoctor)}
-                className="text-sm text-blue-600 hover:underline"
+                className="px-3 py-2 text-sm font-semibold text-ink/70 hover:text-ink"
               >
                 Refresh
               </button>
             </div>
           </div>
 
-          {loading && <p className="p-4 text-gray-500">Loading...</p>}
+          {loading && <p className="p-5 text-sm text-ink/60">Loading the queue...</p>}
 
           {!loading && queue.length === 0 && (
-            <p className="p-4 text-gray-500">No appointments today for this doctor.</p>
+            <p className="p-5 text-sm text-ink/65">No appointments are booked for this doctor today.</p>
           )}
 
           {!loading && queue.length > 0 && (
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left">
+            <div className="overflow-x-auto"><table className="w-full min-w-160 text-sm">
+              <thead className="bg-ink text-left text-panel/70">
                 <tr>
-                  <th className="px-4 py-2">Ticket</th>
-                  <th className="px-4 py-2">Patient</th>
-                  <th className="px-4 py-2">Source</th>
-                  <th className="px-4 py-2">Status</th>
-                  <th className="px-4 py-2">Actions</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em]">Ticket</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em]">Patient</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em]">Source</th>
+                  <th className="px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em]">Status</th>
+                  <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em]">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {queue.map((appt) => (
-                  <tr key={appt.id} className="border-t">
-                    <td className="px-4 py-3 font-semibold">#{appt.ticket_number}</td>
-                    <td className="px-4 py-3">{appt.patient_username}</td>
-                    <td className="px-4 py-3 capitalize">{appt.source.replace('_', ' ')}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${statusStyles[appt.status]}`}>
+                  <tr key={appt.id} className="border-t border-ink/10 hover:bg-paper/60">
+                    <td className="px-5 py-4"><span className="ticket-number text-2xl">#{appt.ticket_number}</span></td>
+                    <td className="px-5 py-4 font-semibold">{appt.patient_username}</td>
+                    <td className="px-5 py-4 capitalize text-ink/65">{appt.source.replace('_', ' ')}</td>
+                    <td className="px-5 py-4">
+                      <span className={`inline-flex px-2.5 py-1 text-xs font-bold capitalize ${statusStyles[appt.status]}`}>
                         {appt.status.replace('_', ' ')}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-5 py-4 text-right">
                       {appt.status === 'booked' && (
-                        <div className="flex gap-2">
+                        <div className="flex justify-end gap-3">
                           <button
                             onClick={() => handleStatusChange(appt.id, 'completed')}
                             disabled={actingOn === appt.id}
-                            className="text-xs text-green-700 hover:underline disabled:opacity-50"
+                            className="text-xs font-semibold text-status-ok hover:underline disabled:opacity-50"
                           >
                             Mark Done
                           </button>
                           <button
                             onClick={() => handleStatusChange(appt.id, 'no_show')}
                             disabled={actingOn === appt.id}
-                            className="text-xs text-red-700 hover:underline disabled:opacity-50"
+                            className="text-xs font-semibold text-status-alert hover:underline disabled:opacity-50"
                           >
                             No Show
                           </button>
@@ -157,7 +159,7 @@ function AdminHome() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}

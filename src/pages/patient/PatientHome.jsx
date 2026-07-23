@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getDoctors, getSlots, bookAppointment } from '../../api/appointments'
+import TicketStub from '../../components/TicketStub'
 
 function PatientHome() {
   const [doctors, setDoctors] = useState([])
@@ -42,16 +43,15 @@ function PatientHome() {
 
   if (confirmedTicket) {
     return (
-      <div className="max-w-md mx-auto mt-12 bg-white p-8 rounded-lg shadow-md text-center">
-        <h2 className="text-xl font-bold text-green-600 mb-2">Booking Confirmed!</h2>
-        <p className="text-gray-600 mb-4">Your ticket number is:</p>
-        <p className="text-5xl font-bold text-blue-600 mb-4">#{confirmedTicket.ticket_number}</p>
-        <p className="text-sm text-gray-500">
-          with {confirmedTicket.doctor_name} on {confirmedTicket.date}
-        </p>
+      <div className="mx-auto max-w-md px-5 py-12 text-center sm:py-16">
+        <p className="text-sm font-semibold text-status-ok">Booked — you’re all set.</p>
+        <h1 className="mt-2 font-display text-3xl font-bold text-ink">Keep this number handy</h1>
+        <div className="mt-7">
+          <TicketStub ticketNumber={confirmedTicket.ticket_number} doctorName={confirmedTicket.doctor_name} date={confirmedTicket.date} />
+        </div>
         <button
           onClick={() => setConfirmedTicket(null)}
-          className="mt-6 text-blue-600 hover:underline text-sm"
+          className="mt-7 text-sm font-semibold text-ink/70 underline decoration-ink/30 underline-offset-4 hover:text-ink"
         >
           Book another appointment
         </button>
@@ -60,53 +60,55 @@ function PatientHome() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Book an Appointment</h1>
+    <div className="mx-auto max-w-2xl px-5 py-10 sm:px-6 sm:py-14">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-ink/55">Appointments</p>
+      <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-ink">Book your visit</h1>
+      <p className="mt-3 max-w-lg text-sm leading-6 text-ink/65">Choose a doctor, then select a time that works for you.</p>
 
-      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {error && <p className="mt-6 border-l-4 border-status-alert bg-status-alert/10 px-4 py-3 text-sm text-ink">{error}</p>}
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Choose a doctor</label>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="mt-9">
+        <label className="block text-sm font-semibold text-ink mb-3">Choose a doctor</label>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {doctors.map((doctor) => (
             <button
               key={doctor.id}
               onClick={() => setSelectedDoctor(doctor)}
-              className={`text-left p-4 rounded-lg border ${
+              className={`min-h-24 border p-5 text-left ${
                 selectedDoctor?.id === doctor.id
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  ? 'border-ink bg-ink text-panel shadow-sm'
+                  : 'border-ink/15 bg-panel hover:border-ink/45'
               }`}
             >
               <p className="font-semibold">{doctor.name}</p>
-              <p className="text-sm text-gray-500">{doctor.specialty}</p>
+              <p className={`mt-1 text-sm ${selectedDoctor?.id === doctor.id ? 'text-panel/70' : 'text-ink/60'}`}>{doctor.specialty}</p>
             </button>
           ))}
         </div>
       </div>
 
       {selectedDoctor && (
-        <div>
-          <label className="block text-sm font-medium mb-2">
+        <div className="mt-9">
+          <label className="block text-sm font-semibold text-ink mb-3">
             Available slots with {selectedDoctor.name}
           </label>
 
-          {loadingSlots && <p className="text-gray-500">Loading slots...</p>}
+          {loadingSlots && <p className="text-sm text-ink/60">Finding today’s available times...</p>}
 
           {!loadingSlots && slots.length === 0 && (
-            <p className="text-gray-500">No open slots for this doctor right now.</p>
+            <p className="border-l-4 border-ink/30 bg-panel px-4 py-3 text-sm text-ink/65">No slots left today for this doctor. Please choose another doctor or check again later.</p>
           )}
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {slots.map((slot) => (
               <button
                 key={slot.id}
                 disabled={booking}
                 onClick={() => handleBook(slot)}
-                className="p-3 rounded-lg border border-gray-200 bg-white hover:border-blue-600 hover:bg-blue-50 disabled:opacity-50"
+                className="min-h-20 border border-ink/15 bg-panel p-3 text-left hover:border-ink hover:bg-ink/5 disabled:opacity-50"
               >
                 <p className="font-medium">{slot.start_time.slice(0, 5)}</p>
-                <p className="text-xs text-gray-500">{slot.date}</p>
+                <p className="mt-1 text-xs text-ink/55">{slot.date}</p>
               </button>
             ))}
           </div>
