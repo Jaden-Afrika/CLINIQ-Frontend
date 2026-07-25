@@ -25,7 +25,7 @@ apiClient.interceptors.request.use((config) => {
     }
   }
 
-  console.debug('API request', {
+  console.log('API request', {
     method: config.method,
     url: config.url,
     baseURL: config.baseURL,

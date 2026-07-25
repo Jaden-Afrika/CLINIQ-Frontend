@@ -31,8 +31,10 @@ function PatientHome() {
   async function loadSpecialties() {
     setLoading(true)
     setError('')
+    console.log('PatientHome: loadSpecialties start')
     try {
       const items = asList(await getDoctorSpecialties(), 'specialties')
+      console.log('PatientHome: getDoctorSpecialties response', items)
       setSpecialties(items.filter((specialty) => Number(specialty.doctor_count) > 0))
 
       // Keep existing links from a doctor's profile working while still loading specialties first.
