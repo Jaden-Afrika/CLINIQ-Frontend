@@ -33,8 +33,23 @@ function PatientHome() {
     setError('')
     console.log('PatientHome: loadSpecialties start')
     try {
-      const items = asList(await getDoctorSpecialties(), 'specialties')
+      let items = asList(await getDoctorSpecialties(), 'specialties')
       console.log('PatientHome: getDoctorSpecialties response', items)
+
+      if (!items.length) {
+        const doctors = asList(await getDoctors(), 'doctors')
+        console.log('PatientHome: getDoctors fallback response', doctors)
+        const specialtiesMap = doctors.reduce((acc, doctor) => {
+          const name = doctor.specialty || doctor.specialty_name || doctor.specialty || ''
+          if (!name) return acc
+          const key = name.toString()
+          if (!acc[key]) acc[key] = { specialty: key, doctor_count: 0 }
+          acc[key].doctor_count += 1
+          return acc
+        }, {})
+        items = Object.values(specialtiesMap)
+      }
+
       setSpecialties(items.filter((specialty) => Number(specialty.doctor_count) > 0))
 
       // Keep existing links from a doctor's profile working while still loading specialties first.
