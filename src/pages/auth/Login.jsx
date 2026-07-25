@@ -3,8 +3,16 @@ import { useNavigate, Link } from 'react-router-dom'
 import { login, isApprovedStaff, isApprovedDoctor } from '../../api/auth'
 import { useAuth } from '../../context/AuthContext'
 
+function getSavedUsername() {
+  try {
+    return sessionStorage.getItem('login_username') || ''
+  } catch {
+    return ''
+  }
+}
+
 function Login() {
-  const [username, setUsername] = useState('')
+  const [username, setUsername] = useState(getSavedUsername)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -18,9 +26,31 @@ function Login() {
     try {
       await login(username, password)
       const user = await refreshUser()
-      navigate(user?.role === 'doctor' ? (isApprovedDoctor(user) ? '/doctor' : '/admin-approval-pending') : user?.role === 'staff' && !isApprovedStaff(user) ? '/admin-approval-pending' : '/')
-    } catch {
-      setError('Invalid username or password.')
+      if (!user) {
+        throw new Error('Could not load the signed-in user.')
+      }
+      try {
+        sessionStorage.removeItem('login_username')
+      } catch {
+        // Saving a username is only a convenience and must not block sign-in.
+      }
+      navigate(
+        user.role === 'super_admin'
+          ? '/super-admin'
+          : user.role === 'doctor'
+          ? (isApprovedDoctor(user) ? '/doctor' : '/admin-approval-pending')
+          : user.role === 'staff' && !isApprovedStaff(user)
+            ? '/admin-approval-pending'
+            : '/',
+      )
+    } catch (err) {
+      if (!err.response) {
+        setError('Could not reach the server. Please check your connection and try again.')
+      } else if (err.response.status === 401) {
+        setError('Invalid username or password.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
@@ -32,6 +62,9 @@ function Login() {
         <p className="font-display text-3xl font-bold text-ink">CliniQ</p>
         <h1 className="mt-7 font-display text-3xl font-bold text-ink">Welcome back</h1>
         <p className="mt-2 text-sm text-ink/60">Log in to manage your visit.</p>
+        <p className="mt-3 rounded border border-ink/10 bg-paper px-3 py-2 text-xs leading-5 text-ink/65">
+          Doctor accounts are reviewed by a super admin before portal access is granted.
+        </p>
 
         {error && <p className="mt-5 border-l-4 border-status-alert bg-status-alert/10 px-3 py-2 text-sm text-ink">{error}</p>}
 
@@ -40,7 +73,14 @@ function Login() {
           <input
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value)
+              try {
+                sessionStorage.setItem('login_username', e.target.value)
+              } catch {
+                // Saving a username is only a convenience and must not block typing.
+              }
+            }}
             className="w-full border border-ink/25 bg-panel px-3 py-3"
             required
           />

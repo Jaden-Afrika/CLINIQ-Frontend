@@ -3,6 +3,23 @@ import { useNavigate, Link } from 'react-router-dom'
 import { register, login, isApprovedStaff, isApprovedDoctor } from '../../api/auth'
 import { useAuth } from '../../context/AuthContext'
 
+function registrationErrorMessage(error) {
+  if (!error.response) {
+    return 'Could not reach the server. Please check your connection and try again.'
+  }
+
+  const data = error.response.data
+  if (typeof data?.detail === 'string') return data.detail
+  if (typeof data === 'object') {
+    const [field, messages] = Object.entries(data)[0] || []
+    const message = Array.isArray(messages) ? messages[0] : messages
+    if (typeof message === 'string') {
+      return field === 'username' ? `Username: ${message}` : message
+    }
+  }
+  return 'Could not create your account. Please review your details and try again.'
+}
+
 function Signup() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -24,8 +41,8 @@ function Signup() {
       await login(username, password)
       const user = await refreshUser()
       navigate(user?.role === 'doctor' ? (isApprovedDoctor(user) ? '/doctor' : '/admin-approval-pending') : user?.role === 'staff' && !isApprovedStaff(user) ? '/admin-approval-pending' : '/')
-    } catch {
-      setError('Could not create account. Try a different username.')
+    } catch (err) {
+      setError(registrationErrorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -59,7 +76,7 @@ function Signup() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full border border-ink/25 bg-panel px-3 py-3"
             required
-            minLength={6}
+            minLength={8}
           />
         </div>
 

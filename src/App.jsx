@@ -5,6 +5,9 @@ import ProtectedRoute from './components/ProtectedRoute'
 import { isApprovedDoctor } from './api/auth'
 import Layout from './components/Layout'
 import PatientHome from './pages/patient/PatientHome'
+import PatientDashboard from './pages/patient/PatientDashboard'
+import DoctorProfile from './pages/patient/DoctorProfile'
+import Settings from './pages/Settings'
 import MyTicket from './pages/patient/MyTicket'
 import AdminHome from './pages/admin/AdminHome'
 import SuperAdminHome from './pages/admin/SuperAdminHome'
@@ -31,7 +34,7 @@ function RoleAwareHome() {
     return <Navigate to="/admin-approval-pending" replace />
   }
 
-  return <PatientHome />
+  return <PatientDashboard />
 }
 
 function App() {
@@ -66,6 +69,9 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="book" element={<ProtectedRoute requiredRole="patient"><PatientHome /></ProtectedRoute>} />
+            <Route path="doctors/:doctorId" element={<ProtectedRoute requiredRole="patient"><DoctorProfile /></ProtectedRoute>} />
+            <Route path="settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="notifications" element={<ProtectedRoute requiredRole="patient"><Notifications /></ProtectedRoute>} />
             <Route
               path="admin"

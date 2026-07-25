@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react'
 import { getPendingAdminAccounts, reviewAdminAccount } from '../../api/adminAccounts'
+import { getSuperAdminDashboard } from '../../api/dashboard'
 
 function SuperAdminHome() {
   const [accounts, setAccounts] = useState([])
   const [loading, setLoading] = useState(true)
   const [actingOn, setActingOn] = useState(null)
   const [error, setError] = useState('')
+  const [stats, setStats] = useState(null)
 
   async function loadAccounts() {
     setLoading(true)
     setError('')
     try {
-      setAccounts(await getPendingAdminAccounts())
+      const [accountData, statData] = await Promise.all([getPendingAdminAccounts(), getSuperAdminDashboard()])
+      setAccounts(accountData)
+      setStats(statData)
     } catch {
       setError('Could not load pending admin accounts.')
     } finally {
@@ -49,6 +53,10 @@ function SuperAdminHome() {
       </div>
 
       {error && <p className="mt-6 border-l-4 border-status-alert bg-status-alert/10 px-4 py-3 text-sm text-ink">{error}</p>}
+
+      <div className="mt-8 grid grid-cols-2 gap-3 md:grid-cols-4">{[
+        ['Pending reviews', stats?.pending_accounts], ['Appointments today', stats?.today_appointments], ['Booked today', stats?.today_booked], ['Active doctors', stats?.active_doctors],
+      ].map(([label, value]) => <div key={label} className="border border-ink/15 bg-panel p-4"><p className="text-xs font-semibold uppercase tracking-[.12em] text-ink/55">{label}</p><p className="mt-2 font-ticket text-3xl font-bold">{stats ? value : '—'}</p></div>)}</div>
 
       <div className="mt-8 overflow-hidden border border-ink/15 bg-panel shadow-sm">
         {loading && <p className="p-5 text-sm text-ink/60">Loading account requests...</p>}

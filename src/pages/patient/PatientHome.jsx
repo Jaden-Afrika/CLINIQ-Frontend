@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { getDoctors, getSlots, bookAppointment } from '../../api/appointments'
 import TicketStub from '../../components/TicketStub'
 
@@ -10,9 +11,14 @@ function PatientHome() {
   const [booking, setBooking] = useState(false)
   const [confirmedTicket, setConfirmedTicket] = useState(null)
   const [error, setError] = useState('')
+  const [searchParams] = useSearchParams()
 
   useEffect(() => {
-    getDoctors().then(setDoctors).catch(() => setError('Could not load doctors.'))
+    getDoctors().then((items) => {
+      setDoctors(items)
+      const requestedDoctor = Number(searchParams.get('doctor'))
+      if (requestedDoctor) setSelectedDoctor(items.find((doctor) => doctor.id === requestedDoctor) || null)
+    }).catch(() => setError('Could not load doctors.'))
   }, [])
 
   useEffect(() => {
@@ -82,6 +88,7 @@ function PatientHome() {
             >
               <p className="font-semibold">{doctor.name}</p>
               <p className={`mt-1 text-sm ${selectedDoctor?.id === doctor.id ? 'text-panel/70' : 'text-ink/60'}`}>{doctor.specialty}</p>
+              <Link to={`/doctors/${doctor.id}`} onClick={(event) => event.stopPropagation()} className={`mt-3 inline-block text-xs font-semibold underline ${selectedDoctor?.id === doctor.id ? 'text-panel' : 'text-ink/70'}`}>View profile</Link>
             </button>
           ))}
         </div>
