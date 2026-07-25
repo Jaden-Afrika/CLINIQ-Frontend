@@ -22,6 +22,10 @@ function MyTicket() {
       if (err.response?.status === 404) {
         setTicket(null)
         setError('You have no active ticket for today.')
+      } else if (err.response?.status === 401) {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('refresh_token')
+        window.location.href = '/login'
       } else {
         setError('Could not load your ticket.')
       }

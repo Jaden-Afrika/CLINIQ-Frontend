@@ -8,6 +8,14 @@ function asList(payload, key) {
   return payload?.[key] || payload?.results || payload?.items || []
 }
 
+function normalizeSpecialty(specialty) {
+  return {
+    ...specialty,
+    specialty: specialty.specialty || specialty.name || specialty.specialty_name || '',
+    doctor_count: Number(specialty.doctor_count ?? specialty.count ?? specialty.doctorCount ?? 0),
+  }
+}
+
 function DoctorAvatar({ doctor }) {
   const initials = (doctor.name || 'Doctor').split(' ').map((part) => part[0]).slice(-2).join('')
   return <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-ink text-sm font-bold text-panel">{doctor.photo_url || doctor.photo ? <img src={doctor.photo_url || doctor.photo} alt="" className="h-full w-full object-cover" /> : initials}</div>
@@ -50,7 +58,11 @@ function PatientHome() {
         items = Object.values(specialtiesMap)
       }
 
-      setSpecialties(items.filter((specialty) => Number(specialty.doctor_count) > 0))
+      setSpecialties(
+        items
+          .map(normalizeSpecialty)
+          .filter((specialty) => specialty.specialty && specialty.doctor_count > 0)
+      )
 
       // Keep existing links from a doctor's profile working while still loading specialties first.
       const requestedDoctor = Number(searchParams.get('doctor'))
