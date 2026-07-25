@@ -80,7 +80,7 @@ function MyTicket() {
 
       {!loading && ticket && (
         <div className="mt-8">
-          <TicketStub ticketNumber={ticket.ticket_number} doctorName={ticket.doctor_name}>
+          <TicketStub ticketNumber={ticket.ticket_number} doctorName={ticket.doctor_name} date={ticket.date} time={ticket.scheduled_time}>
             <div className="mt-7 grid grid-cols-2 gap-3 border-t border-dashed border-ink/25 pt-5 text-left">
               <div><p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/55">Your number</p><p className="ticket-number mt-2 text-3xl">#{ticket.ticket_number}</p></div>
               <div><p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink/55">Now serving</p><p className="ticket-number mt-2 text-3xl">#{ticket.now_serving}</p></div>

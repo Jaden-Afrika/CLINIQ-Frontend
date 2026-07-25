@@ -35,6 +35,11 @@ function DoctorDashboard() {
     return () => window.clearTimeout(timer)
   }, [])
 
+  useEffect(() => {
+    window.addEventListener('doctor-treatment-recorded', load)
+    return () => window.removeEventListener('doctor-treatment-recorded', load)
+  }, [])
+
   async function handleSave(treatment) {
     const treatmentId = treatment.id ?? treatment.appointment_id
     const diagnosis = drafts[treatmentId] ?? treatment.diagnosis ?? ''

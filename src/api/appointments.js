@@ -1,7 +1,14 @@
 import apiClient from './client'
 
-export async function getDoctors() {
-  const res = await apiClient.get('/doctors/')
+export async function getDoctors(specialty) {
+  const res = await apiClient.get('/doctors/', {
+    params: specialty ? { specialty } : undefined,
+  })
+  return res.data
+}
+
+export async function getDoctorSpecialties() {
+  const res = await apiClient.get('/doctors/specialties/')
   return res.data
 }
 
@@ -32,6 +39,23 @@ export async function advanceQueue(doctorId) {
 
 export async function updateAppointmentStatus(appointmentId, status) {
   const res = await apiClient.patch(`/admin/appointments/${appointmentId}/status/`, { status })
+  return res.data
+}
+
+export async function getAdminAppointments(filters = {}) {
+  const params = Object.fromEntries(
+    Object.entries(filters).filter(([, value]) => value !== '' && value !== null && value !== undefined)
+  )
+  const res = await apiClient.get('/admin/appointments/', { params })
+  return res.data
+}
+
+export async function registerWalkIn({ username, phone, doctorId, date }) {
+  const payload = { username }
+  if (phone) payload.phone = phone
+  payload.doctor_id = doctorId
+  if (date) payload.date = date
+  const res = await apiClient.post('/admin/walk-ins/', payload)
   return res.data
 }
 
