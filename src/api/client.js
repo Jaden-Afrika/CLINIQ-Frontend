@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
+const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://cliniq-backend-oot3.onrender.com/api'
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,
@@ -14,9 +14,24 @@ apiClient.interceptors.request.use((config) => {
   if (!isAuthEndpoint) {
     const token = localStorage.getItem('access_token')
     if (token) {
+      config.headers = config.headers || {}
       config.headers.Authorization = `Bearer ${token}`
+    } else {
+      console.warn('Protected API request without access token', {
+        url: config.url,
+        baseURL: config.baseURL,
+        method: config.method,
+      })
     }
   }
+
+  console.debug('API request', {
+    method: config.method,
+    url: config.url,
+    baseURL: config.baseURL,
+    authHeader: config.headers?.Authorization,
+  })
+
   return config
 })
 
