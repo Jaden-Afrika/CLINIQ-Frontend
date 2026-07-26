@@ -3,16 +3,16 @@ import { useNavigate, Link } from 'react-router-dom'
 import { login, isApprovedStaff, isApprovedDoctor } from '../../api/auth'
 import { useAuth } from '../../context/AuthContext'
 
-function getSavedUsername() {
+function getSavedLoginIdentifier() {
   try {
-    return sessionStorage.getItem('login_username') || ''
+    return sessionStorage.getItem('login_identifier') || sessionStorage.getItem('login_username') || ''
   } catch {
     return ''
   }
 }
 
 function Login() {
-  const [username, setUsername] = useState(getSavedUsername)
+  const [identifier, setIdentifier] = useState(getSavedLoginIdentifier)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -24,15 +24,16 @@ function Login() {
     setError('')
     setLoading(true)
     try {
-      await login(username, password)
+      await login(identifier, password)
       const user = await refreshUser()
       if (!user) {
         throw new Error('Could not load the signed-in user.')
       }
       try {
+        sessionStorage.removeItem('login_identifier')
         sessionStorage.removeItem('login_username')
       } catch {
-        // Saving a username is only a convenience and must not block sign-in.
+        // Saving a login identifier is only a convenience and must not block sign-in.
       }
       navigate(
         user.role === 'super_admin'
@@ -62,23 +63,20 @@ function Login() {
         <p className="font-display text-3xl font-bold text-ink">CliniQ</p>
         <h1 className="mt-7 font-display text-3xl font-bold text-ink">Welcome back</h1>
         <p className="mt-2 text-sm text-ink/60">Log in to manage your visit.</p>
-        <p className="mt-3 rounded border border-ink/10 bg-paper px-3 py-2 text-xs leading-5 text-ink/65">
-          Doctor accounts are reviewed by a super admin before portal access is granted.
-        </p>
 
         {error && <p className="mt-5 border-l-4 border-status-alert bg-status-alert/10 px-3 py-2 text-sm text-ink">{error}</p>}
 
         <div className="mt-6">
-          <label className="mb-2 block text-sm font-semibold">Username</label>
+          <label className="mb-2 block text-sm font-semibold">Email or username</label>
           <input
             type="text"
-            value={username}
+            value={identifier}
             onChange={(e) => {
-              setUsername(e.target.value)
+              setIdentifier(e.target.value)
               try {
-                sessionStorage.setItem('login_username', e.target.value)
+                sessionStorage.setItem('login_identifier', e.target.value)
               } catch {
-                // Saving a username is only a convenience and must not block typing.
+                // Saving a login identifier is only a convenience and must not block typing.
               }
             }}
             className="w-full border border-ink/25 bg-panel px-3 py-3"

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://cliniq-backend-oot3.onrender.com/api'
+const apiBaseUrl = 'http://127.0.0.1:8001/api'
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,

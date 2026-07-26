@@ -31,7 +31,7 @@ function Layout() {
           {canUseAdminTools(user) && <Link to="/admin" className="hover:underline">Admin</Link>}
           {user?.role === 'super_admin' && <Link to="/super-admin" className="hover:underline">Account Reviews</Link>}
           {user && <Link to="/settings" className="hover:underline">Settings</Link>}
-          {user && <span className="hidden text-xs text-ink/55 md:inline">{user.username} · {user.role}</span>}
+          {user && <span className="hidden text-xs text-ink/55 md:inline">{user.full_name || user.username} · {user.role}</span>}
           <button onClick={handleLogout} className="border border-ink/20 px-3 py-2 text-xs hover:border-ink hover:text-ink">
             Log Out
           </button>

@@ -5,6 +5,7 @@ import TicketStub from '../../components/TicketStub'
 
 function MyTicket() {
   const [ticket, setTicket] = useState(null)
+  const [ticketMissing, setTicketMissing] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [rating, setRating] = useState(0)
@@ -18,10 +19,11 @@ function MyTicket() {
     try {
       const data = await getMyTicket()
       setTicket(data)
+      setTicketMissing(false)
     } catch (err) {
       if (err.response?.status === 404) {
         setTicket(null)
-        setError('You have no active ticket for today.')
+        setTicketMissing(true)
       } else if (err.response?.status === 401) {
         localStorage.removeItem('access_token')
         localStorage.removeItem('refresh_token')
@@ -62,7 +64,10 @@ function MyTicket() {
   }
 
   useEffect(() => {
-    loadTicket()
+    async function fetchTicket() {
+      await loadTicket()
+    }
+    fetchTicket()
   }, [])
 
   const isCompletedVisit = ticket?.status === 'completed' || ticket?.status === 'complete' || ticket?.status === 'done'
@@ -78,6 +83,13 @@ function MyTicket() {
       {!loading && error && (
         <div className="mt-8 text-center">
           <p className="text-sm leading-6 text-ink/65">{error} Book an appointment to get your place in today’s queue.</p>
+          <Link to="/" className="mt-5 inline-block bg-ticket px-5 py-3 text-sm font-semibold text-ink hover:bg-ticket/85">Book an appointment</Link>
+        </div>
+      )}
+
+      {!loading && ticketMissing && !error && (
+        <div className="mt-8 text-center">
+          <p className="text-sm leading-6 text-ink/65">You have no active ticket for today. Book an appointment to get your place in today’s queue.</p>
           <Link to="/" className="mt-5 inline-block bg-ticket px-5 py-3 text-sm font-semibold text-ink hover:bg-ticket/85">Book an appointment</Link>
         </div>
       )}
