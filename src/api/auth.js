@@ -15,8 +15,7 @@ function buildSuggestedUsername(fullName, email) {
 
 function buildLoginPayload(identifier, password) {
   const trimmed = identifier?.trim()
-  if (!trimmed) return { password }
-  return trimmed.includes('@') ? { email: trimmed, password } : { username: trimmed, password }
+  return { username: trimmed, password }
 }
 
 export async function login(identifier, password) {
